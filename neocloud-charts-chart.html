@@ -6,7 +6,7 @@ Copyright (c) 2017 Neo
 <link rel="import" href="neocloud-charts-behavior.html">
 <link rel="import" href="neocloud-charts-shared-styles.html">
 
-<dom-module id="neocloud-charts">
+<dom-module id="neocloud-charts-chart">
   <template>
     <style include="neocloud-charts-shared-styles"></style>
     <div id="Chart" width="100%" on-click="_checkSelected"></div>
@@ -15,7 +15,7 @@ Copyright (c) 2017 Neo
 
   <script>
     Polymer({
-      is: 'neocloud-charts',
+      is: 'neocloud-charts-chart',
 
       behaviors: [
         Highcharts.Polymer_BaseBehavior,
