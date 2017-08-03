@@ -1,0 +1,35 @@
+<link rel="import" href="neocloud-charts-behavior.html">
+<link rel="import" href="neocloud-charts-shared-styles.html">
+
+<dom-module id="neocloud-charts-stock">
+    <template>
+        <style include="neocloud-charts-shared-styles"></style>
+        <div id="Chart" width="100%" on-click="_checkSelected"></div>
+        <content></content>
+    </template>
+    <script>
+        'use strict';
+        Polymer({
+            is: "neocloud-charts-stock",
+
+            behaviors: [
+              Highcharts.Polymer_BaseBehavior,
+              Highcharts.Polymer_ChartBehavior
+            ],
+
+            properties: {
+              /**
+               * Chart title
+               */
+              title: {
+                type: String,
+                value: "",
+                observer: "_titleUpdate"
+              }
+            },
+            ready: function() {
+             this.__createChart("StockChart")
+            }
+        });
+    </script>
+</dom-module>
