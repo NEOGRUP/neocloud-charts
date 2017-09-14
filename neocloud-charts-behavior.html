@@ -8,6 +8,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <script src="../jquery/dist/jquery.min.js"></script>
 <script src="../highcharts/highstock.js"></script>
+<script src="../highcharts/modules/heatmap.js"></script>
 <script src="../highcharts/modules/exporting.js"></script>
 <script src="../highcharts/modules/drilldown.js"></script>
 
@@ -24,11 +25,14 @@
             colorByPoint: {type: Boolean, value: false, reflectToAttribute:true, observer: "_cbpUpdate"},
             monochromatic: {type: Boolean, value: false, reflectToAttribute:true}, //MMC
             color: {type: String, value: false, reflectToAttribute:true}, //MMC
+            colorAxis: {type: Object, value: function(){return {}}, reflectToAttribute:true}, //EPL
             credits: {type: Boolean, value: false, reflectToAttribute:true, observer: "_creditsUpdate"},
             legend: {type: Boolean, value: false, reflectToAttribute:true, observer: "_legendUpdate"},
             chartOptions: {type: Object, value: function(){return {}}, observer: "_chartUpdate"},
             plotOptions: {type: Object, value: function(){return {}}, observer: "_plotUpdate"},
             xAxis: {type: Object, value: function(){return {}}, observer: "_xAxisUpdate"},
+            xAxisCategories: {type: Object, value: function(){return {}}, reflectToAttribute: true}, //EPL
+            yAxisCategories: {type: Object, value: function(){return {}}, reflectToAttribute: true}, //EPL
             yAxis: {type: Object, value: function(){return {}}, observer: "_yAxisUpdate"},
             xLabel: {type: String, value: "", observer: "_xAxisTitleUpdate"},
             yLabel: {type: String, value: "", observer: "_yAxisTitleUpdate"},
@@ -48,12 +52,11 @@
             __microTaskDelaySetData: {type: Number, value: 25}},
         created: function() {this.__lateBindCallbacks = $.extend({}, this.__lateBindCallbacks, {_updateType:1,_loadingUpdate:1})},
         __createChart: function(namespace) {
-//          console.log("Chart " + this._chart)
+
             var xAxis = $.extend(this.vsTime?{type: 'datetime',tickPixelInterval: 150}:{},this.xAxis, {title: {text: this._getAxisLabel('X')}});
             var yAxis = $.extend(this.yAxis, {title: {text: this._getAxisLabel('Y')}});
             var Series = this.data.length && this.data[0].data instanceof Array?this.data:[{name: (this.label||this.yLabel||this.xLabel),colorByPoint: this.colorByPoint, data: this.data}]
-            var __app = this
-
+            var __app = this;
 
             // Custom plot options for NEO charts
             switch (this.mode) {
@@ -144,8 +147,19 @@
                     },
                   }
                 }
-            }
 
+                break;
+              case "statsHoursWeekSales":
+                this.xAxis.categories = this.xAxisCategories.categories,
+                this.yAxis.categories = this.yAxisCategories.categories,
+                this.plotOptions = {
+                  heatmap: {
+                    borderWidth: 1,
+                    borderColor: '#FFFFFF',
+                  }
+                }
+                break;
+            }
 
             this._set_chart(new Highcharts[namespace||"Chart"]($.extend(true,{},{
                 chart: $.extend({
@@ -183,6 +197,9 @@
                 subtitle: {text: this.subtitle},
                 xAxis: xAxis,
                 yAxis: yAxis,
+
+
+                colorAxis:(Object.keys(this.colorAxis).length === 0 && this.colorAxis.constructor === Object)? null:this.colorAxis,
                 credits: {enabled: this.credits},
                 plotOptions: $.extend({
                   series: {
@@ -198,11 +215,19 @@
                     }
                   }
                 }, this.plotOptions),
-                tooltip: $.extend(this.vsTime?{formatter: function () {
-                        return '<b>'+this.series.name+'</b><br>' +
-                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br>' +
-                            Highcharts.numberFormat(this.y, 2);
-                    }}:{},this.tooltipOptions),
+
+//              tooltip: $.extend(this.vsTime?{formatter: function () {
+//                        return '<b>'+this.series.name+'</b><br>' +
+//                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br>' +
+//                            Highcharts.numberFormat(this.y, 2);
+//                    }}:{},this.tooltipOptions),
+
+              tooltip: $.extend(this.mode=="statsHoursWeekSales"?{formatter: function () {
+                return this.series.xAxis.categories[this.point.x] + ' - ' + this.series.yAxis.categories[this.point.y] + ' h<br><b>' +
+                  this.point.value + ' €</b>';
+              }}:{},this.tooltipOptions),
+
+
                 legend: $.extend({enabled: this.legend},this.legendOptions),
                 exporting: {enabled: this.export},
                 series: Series,
@@ -235,7 +260,8 @@
 
         },
         setData: function(x,z) {
-//          console.log(this.mode + " Set Data" );
+//          console.log(x + " Set Data" );
+//          console.log(z + " Set Data" );
             var __app = this, isArr = x instanceof Array;
             if (!isArr) {x = $.extend({name: (this.label||this.yLabel||this.xLabel),colorByPoint: this.colorByPoint},x)}
             if (x && x.length && x[0].data instanceof Array) {
