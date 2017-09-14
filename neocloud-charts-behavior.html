@@ -223,7 +223,7 @@
 //                    }}:{},this.tooltipOptions),
 
               tooltip: $.extend(this.mode=="statsHoursWeekSales"?{formatter: function () {
-                return this.series.xAxis.categories[this.point.x] + ' - ' + this.series.yAxis.categories[this.point.y] + ' h<br><b>' +
+                return this.series.xAxis.categories[this.point.x] + '<br>' + this.series.yAxis.categories[this.point.y] + '<br><b>' +
                   this.point.value + ' €</b>';
               }}:{},this.tooltipOptions),
 
