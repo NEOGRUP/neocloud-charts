@@ -26,10 +26,6 @@
             type: String, 
             value: 'spline', 
             observer: '_updateType'
-          },
-          chartHeight: {
-            type: String, 
-            value: '100%'
           }
         }
       }
@@ -37,11 +33,6 @@
       ready() {
         super.ready();
         this.__createChart()
-      }
-
-      connectedCallback(){
-        super.connectedCallback();
-        this.updateStyles({'--chart-height': this.chartHeight});
       }
     }
     customElements.define(NeocloudChartsChart.is, NeocloudChartsChart);

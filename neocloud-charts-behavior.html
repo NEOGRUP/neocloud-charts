@@ -9,6 +9,7 @@
 <link rel="import" href="../polymer/lib/utils/async.html">
 <script src="../jquery/dist/jquery.min.js"></script>
 <script src="../highcharts/highstock.js"></script>
+<script src="../highcharts/modules/heatmap.js"></script>
 <script src="../highcharts/modules/exporting.js"></script>
 <script src="../highcharts/modules/drilldown.js"></script>
 
@@ -41,7 +42,9 @@
                 chartOptions: {type: Object, value: newObj, observer: "_chartUpdate"},
                 plotOptions: {type: Object, value: newObj, observer: "_plotUpdate"},
                 xAxis: {type: Object, value: newObj, observer: "_xAxisUpdate"},
+                xAxisCategories: {type: Object, value: newObj, observer: "_xAxisCategoriesUpdate"}, //EPL
                 yAxis: {type: Object, value: newObj, observer: "_yAxisUpdate"},
+                yAxisCategories: {type: Object, value: newObj, observer: "_yAxisCategoriesUpdate"}, //EPL
                 xLabel: {type: String, value: "", observer: "_xAxisTitleUpdate"},
                 yLabel: {type: String, value: "", observer: "_yAxisTitleUpdate"},
                 label: {type: String, value: "", observer: "_labelUpdate"},
@@ -60,10 +63,10 @@
                 __microTaskDelaySetData: {type: Number, value: 25}
             }}
             __createChart(namespace) {
-                var xAxis = $.extend(this.vsTime?{type: 'datetime',tickPixelInterval: 150}:{},this.xAxis, {title: {text: this._getAxisLabel('X')}});
-                var yAxis = $.extend(this.yAxis, {title: {text: this._getAxisLabel('Y')}});
-                var Series = this.data.length && this.data[0].data instanceof Array?this.data:[{name: (this.label||this.yLabel||this.xLabel),colorByPoint: this.colorByPoint, data: this.data}];
-                var __app = this;
+                let xAxis = $.extend(this.vsTime?{type: 'datetime',tickPixelInterval: 150}:{},this.xAxis, {title: {text: this._getAxisLabel('X')}});
+                let yAxis = $.extend(this.yAxis, {title: {text: this._getAxisLabel('Y')}});
+                let Series = this.data.length && this.data[0].data instanceof Array?this.data:[{name: (this.label||this.yLabel||this.xLabel),colorByPoint: this.colorByPoint, data: this.data}];
+                let __app = this;
 
                 // Custom plot options for NEO charts
                 switch (this.mode) {
@@ -236,7 +239,7 @@
 
                  if (this.monochromatic) { //MMC
                   this._chart.options.plotOptions.pie.colors = (function () {
-                    var colors = [],
+                    let colors = [],
                       base = '#058DC7', //Highcharts.getOptions().colors[0],
                       i;
                     for (i = 0; i < 10; i += 1) {
@@ -293,7 +296,9 @@
             _updateType() {if(!this.type){return};this.updateSeries("type",this.type)}
             _cbpUpdate() {this.updateSeries("colorByPoint",this.colorByPoint)}
             _xAxisUpdate() {if(!this._chart){return};this._chart.xAxis[0].update(this.xAxis)}
+            _xAxisCategoriesUpdate() {if(!this._chart){return};this._chart.xAxis[0].update({categories: this.xAxisCategories.categories})}
             _yAxisUpdate() {if(!this._chart){return};this._chart.yAxis[0].update(this.yAxis)}
+            _yAxisCategoriesUpdate() {if(!this._chart){return};this._chart.yAxis[0].update({categories: this.yAxisCategories.categories})}
             _zoomUpdate() {if(!this._chart){return};this._chart.update({chart: {zoomType: ""+(this.xZoom?"x":'')+(this.yZoom?"y":'')}})}
             _xAxisTitleUpdate() {if(!this._chart){return};this._chart.xAxis[0].update({title: {text: this._getAxisLabel('X')}})}
             _yAxisTitleUpdate() {if(!this._chart){return};this._chart.yAxis[0].update({title: {text: this._getAxisLabel('Y')}})}
@@ -326,7 +331,7 @@
             }}
             
             _vsTimeUpdate(a) {if(!this._chart || typeof a == "undefined"){return};this.destroy();this.ready()}
-            _checkSelected() {if(!this._chart){return};var points = this._chart.getSelectedPoints();this._setSelected(!!points.length);this._setSelectedPoints(points)}
+            _checkSelected() {if(!this._chart){return};let points = this._chart.getSelectedPoints();this._setSelected(!!points.length);this._setSelectedPoints(points)}
         }
     }
 </script>
