@@ -1,41 +1,40 @@
-<!--
-@license
-Copyright (c) 2017 Neo
--->
-
 <link rel="import" href="neocloud-charts-behavior.html">
 <link rel="import" href="neocloud-charts-shared-styles.html">
 
 <dom-module id="neocloud-charts-chart">
   <template>
     <style include="neocloud-charts-shared-styles"></style>
-    <div id="Chart" width="100%" on-click="_checkSelected"></div>
-    <content></content>
+    <div id="Chart"  on-click="_checkSelected"></div>
+    <slot></slot>
   </template>
-
   <script>
-    Polymer({
-      is: 'neocloud-charts-chart',
-
-      behaviors: [
-        Highcharts.Polymer_BaseBehavior,
-        Highcharts.Polymer_ChartBehavior
-      ],
-
-      properties: {
-        /**
-         * Chart type (bar, pie, column...)
-         */
-        type: {
-          type: String,
-          value: 'spline',
-          observer: '_updateType'}
-        },
-
-      ready: function() {
-        this.__createChart()
+    'use strict';
+    /**
+    @polymer
+    @customElement
+    @appliesMixin Highcharts.Polymer_ChartBehavior
+    @appliesMixin Highcharts.Polymer_BaseBehavior
+    */
+    class NeocloudChartsChart extends Highcharts.Polymer_ChartBehavior(Highcharts.Polymer_BaseBehavior(Polymer.Element)) {
+      static get is() {
+        return 'neocloud-charts-chart'
       }
 
-    });
+      static get properties() {
+        return {
+          type: {
+            type: String, 
+            value: 'spline', 
+            observer: '_updateType'
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+        this.__createChart()
+      }
+    }
+    customElements.define(NeocloudChartsChart.is, NeocloudChartsChart);
   </script>
 </dom-module>
