@@ -4,16 +4,18 @@
     Repo:     https://github.com/avdaredevil/highcharts-chart
     Website:  https://avdaredevil.github.io/highcharts-chart/
     LinkedIn: https://www.linkedin.com/in/apoorvverma
-|======================================================================*/</script>
-<link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../polymer/lib/utils/async.html">
-<script src="../jquery/dist/jquery.min.js"></script>
-<script src="../highcharts/highstock.js"></script>
-<script src="../highcharts/modules/heatmap.js"></script>
-<script src="../highcharts/modules/exporting.js"></script>
-<script src="../highcharts/modules/drilldown.js"></script>
-
-<script>
+  |======================================================================*/</script>
+  <link rel="import" href="../polymer/polymer-element.html">
+  <link rel="import" href="../polymer/lib/utils/async.html">
+  <script src="../jquery/dist/jquery.min.js"></script>
+  <script src="../highcharts/highstock.js"></script>
+  <script src="../highcharts/modules/heatmap.js"></script>
+  <script src="../highcharts/modules/exporting.js"></script>
+  <script src="../highcharts/modules/drilldown.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment-with-locales.min.js"></script>
+  
+  <script>
     'use strict';
     Highcharts.setOptions({global: {useUTC: false}})
     /**
@@ -67,12 +69,15 @@
                 let yAxis = $.extend(this.yAxis, {title: {text: this._getAxisLabel('Y')}});
                 let Series = this.data.length && this.data[0].data instanceof Array?this.data:[{name: (this.label||this.yLabel||this.xLabel),colorByPoint: this.colorByPoint, data: this.data}];
                 let __app = this;
-
+  
                 // Custom plot options for NEO charts
                 switch (this.mode) {
                   case "statsFamiliesSales":
-                  case "statsZonesSales":
+                  case "statsFamiliesEvolSales":
                   case "statsGroupsSales":
+                  case "statsGroupsEvolSales":
+                  case "statsSourcesSales":
+                  case "statsZonesSales":
                     this.plotOptions = {
                       pie: {
                         allowPointSelect: true,
@@ -92,11 +97,11 @@
                           'headerFormat': '{point.key}<br>',
                           'pointFormat': '<b>{point.y} €</b> ({point.percentage:.1f}%)'
                         }
-
+  
                       }
                     }
                     break;
-
+  
                   case "statsHoursSales":
                     this.xAxis.type = "category";
                     this.plotOptions = {
@@ -110,7 +115,7 @@
                       }
                     }
                     break;
-
+  
                   case "statsPayments":
                     this.xAxis.type = "category";
                     this.plotOptions = {
@@ -124,7 +129,7 @@
                       }
                     }
                     break;
-
+  
                   case "statsWeekSales":
                     this.tooltipOptions = {
                       _shared: true
@@ -138,9 +143,8 @@
                         }
                       }
                     }
-
                     break;
-
+  
                   case "statsMonthSales":
                     this.tooltipOptions = {
                       shared: true
@@ -157,8 +161,8 @@
                         },
                       }
                     }
-
                     break;
+  
                   case "statsHoursWeekSales":
                     this.plotOptions = {
                       heatmap: {
@@ -167,8 +171,71 @@
                       }
                     }
                     break;
+  
+                  case "statsMonthSales":
+                    this.tooltipOptions = {
+                      shared: true
+                    };
+                    this.xAxis.type = "category";
+                    this.plotOptions = {
+                      spline: {
+                        marker: {
+                          enabled: false
+                        },
+                        tooltip: {
+                          'headerFormat': '{point.key}<br>',
+                          'pointFormat': '{series.name}: <b>{point.y} €</b><br>'
+                        }
+                      }
+                    };
+                    break;
+  
+                  case "statsMonthSalesDOW":
+                    this.tooltipOptions = {
+                      shared: true
+                    };
+                    this.xAxis.type = "category";
+                    this.plotOptions = {
+                      spline: {
+                        marker: {
+                          enabled: false
+                        },
+                        tooltip: {
+                          // 'headerFormat': moment('{point.key}').format(),
+                          'headerFormat': moment('20180510').format('L') + '<br>',
+                          // 'headerFormat': '{point.key}<br>',
+                          'pointFormat': '{series.name}: <b>{point.y} €</b><br>'
+                        }
+                      }
+                    };
+                    break;
+  
+                  case "statsHoursWeekSales":
+                  case "statsHoursWeekSalesAverage":
+                  case "statsMonthYearSales":
+                    this.plotOptions = {
+                      heatmap: {
+                        borderWidth: 1,
+                        borderColor: '#FFFFFF'
+                      }
+                    };
+                    break;
+  
+                  case "statsHistogramPrice":
+                    this.xAxis.type = "category";
+                    this.plotOptions = {
+                      column: {
+                        color: this.color,
+                        groupPadding: 0.01,
+                        tooltip: {
+                          'headerFormat': '{point.key} €<br>',
+                          'pointFormat': '<b>{point.y} tickets</b>'
+                        }
+                      }
+                    };
+                    break;
                 }
-
+  
                 this._set_chart(new Highcharts[namespace||"Chart"]($.extend(true,{},{
                     chart: $.extend({
                         renderTo: __app.$.Chart,
@@ -198,7 +265,7 @@
                         'fontSize': '16px',
                         'fontFamily': 'Roboto',
                         'fontWeight': 'bolder'
-
+  
                       },
                     },
                     subtitle: {text: this.subtitle},
@@ -225,10 +292,19 @@
           //                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br>' +
           //                            Highcharts.numberFormat(this.y, 2);
           //                    }}:{},this.tooltipOptions),
-                  tooltip: $.extend(this.mode=="statsHoursWeekSales"?{formatter: function () {
-                    return this.series.xAxis.categories[this.point.x] + '<br>' + this.series.yAxis.categories[this.point.y] + '<br><b>' +
-                      this.point.value + ' €</b>';
-                  }}:{},this.tooltipOptions),
+                  tooltip: $.extend(this.mode == "statsHoursWeekSales" || this.mode == "statsHoursWeekSalesAverage" || this.mode == "statsMonthYearSales" ? {
+                    formatter: function formatter() {
+                      return this.series.xAxis.categories[this.point.x] + '<br>' + this.series.yAxis.categories[this.point.y] + '<br><b>' + this.point.value + ' €</b>';
+                    }
+                  } : this.mode == "statsMonthSalesDOW" ? {
+                    formatter: function formatter() {
+                      var result = moment(this.points[0].key).format('L') + ' ' + moment(this.points[0].key).format('ddd');
+                      this.points.forEach(function (element) {
+                        result = result + "<br>" + element.series.name + ': <b>' + element.y + ' €</b>'; // console.log(element)
+                      });
+                      return result;
+                    }
+                  } : {}, this.tooltipOptions),
                     legend: $.extend({enabled: this.legend},this.legendOptions),
                     exporting: {enabled: this.export},
                     series: Series,
@@ -236,7 +312,7 @@
                 },this.highchartOptions)))
                 setTimeout(_ => this.resizeChart(), 50)
                 setTimeout(_ => this.__lateBinders(), 50)
-
+  
                  if (this.monochromatic) { //MMC
                   this._chart.options.plotOptions.pie.colors = (function () {
                     let colors = [],
@@ -293,7 +369,7 @@
             _plotUpdate(o) {if(!this._chart){return};this._chart.update({plotOptions: o})}
             _chartUpdate(o) {if(!this._chart){return};Object.keys(o||{}).length && this._warn("Not doing what you wanted, maybe you meant plotOptions?","chartOptions");this._chart.update({chart: o})}
             _exportingUpdate(x) {if(!this._chart){return};this._chart.update({exporting: {enabled: x}})}
-            _updateType() {if(!this.type){return};this.updateSeries("type",this.type)}
+            _updateType() {if(!this.type){return};this.updateSeries("type",this.type);this._xAxisCategoriesUpdate();this._yAxisCategoriesUpdate();}
             _cbpUpdate() {this.updateSeries("colorByPoint",this.colorByPoint)}
             _xAxisUpdate() {if(!this._chart){return};this._chart.xAxis[0].update(this.xAxis)}
             _xAxisCategoriesUpdate() {if(!this._chart){return};this._chart.xAxis[0].update({categories: this.xAxisCategories.categories})}
@@ -334,4 +410,4 @@
             _checkSelected() {if(!this._chart){return};let points = this._chart.getSelectedPoints();this._setSelected(!!points.length);this._setSelectedPoints(points)}
         }
     }
-</script>
+  </script>
