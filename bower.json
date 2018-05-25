@@ -1,6 +1,6 @@
 {
   "name": "neocloud-charts",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Polymer component based on highcharts-charts",
   "authors": [
     "edgar.piera@neogrup.com"
